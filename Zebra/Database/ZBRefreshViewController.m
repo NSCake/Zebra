@@ -237,6 +237,19 @@ typedef enum {
 }
 
 - (void)writeToConsole:(NSString *)str atLevel:(ZBLogLevel)level {
+    static UIFont *monospace, *monospaceBold;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        CGFloat size = 10.0;
+        if (@available(iOS 13, *)) {
+            monospace = [UIFont monospacedSystemFontOfSize:size weight:UIFontWeightRegular];
+            monospaceBold = [UIFont monospacedSystemFontOfSize:size weight:UIFontWeightBold];
+        } else {
+            monospace = [UIFont fontWithName:@"Menlo-Regular" size:size];
+            monospaceBold = [UIFont fontWithName:@"Menlo-Bold" size:size];
+        }
+    });
+    
     if (str == NULL)
         return;
     if (![str hasSuffix:@"\n"])
@@ -250,17 +263,17 @@ typedef enum {
                 if (!isDark) {
                     color = [UIColor blackColor];
                 }
-                font = [UIFont fontWithName:level == ZBLogLevelDescript ? @"CourierNewPSMT" : @"CourierNewPS-BoldMT" size:10.0];
+                font = level == ZBLogLevelDescript ? monospace : monospaceBold;
                 break;
             }
             case ZBLogLevelError: {
                 color = [UIColor redColor];
-                font = [UIFont fontWithName:@"CourierNewPS-BoldMT" size:10.0];
+                font = monospaceBold;
                 break;
             }
             case ZBLogLevelWarning: {
                 color = [UIColor yellowColor];
-                font = [UIFont fontWithName:@"CourierNewPSMT" size:10.0];
+                font = monospace;
                 break;
             }
             default:
